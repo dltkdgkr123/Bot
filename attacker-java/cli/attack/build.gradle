@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'org.sh'
+version = '0.0.1'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'org.sh.attack.Main'
+}
+
+jar {
+    archiveFileName = 'attack.jar'
+
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass
+        )
+    }
+}
