@@ -35,9 +35,12 @@ dependencies {
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
+	// with bom
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
@@ -55,6 +58,12 @@ dependencies {
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'junit' // junit5 사용 중 -> junit4 제외
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.0"
 	}
 }
 
