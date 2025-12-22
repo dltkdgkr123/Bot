@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '4.0.0'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.sh'
@@ -9,65 +9,97 @@ version = '0.0.1-SNAPSHOT'
 description = 'none'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-	implementation 'org.springframework.boot:spring-boot-starter-kafka'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-kafka'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
+    // with bom
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    // with bom
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
 
-	// with bom
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
+    // with bom
+    testImplementation platform("org.mockito:mockito-bom:5.12.0")
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "org.mockito:mockito-junit-jupiter"
 
-	// with bom
-	testImplementation platform("org.mockito:mockito-bom:5.12.0")
-	testImplementation "org.mockito:mockito-core"
-	testImplementation "org.mockito:mockito-junit-jupiter"
+    // with bom
+    testImplementation platform('org.junit:junit-bom:5.9.2')
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// with bom
-	testImplementation platform('org.junit:junit-bom:5.9.2')
-	testImplementation "org.junit.jupiter:junit-jupiter"
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'junit' // junit5 사용 중 -> junit4 제외
-	}
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'junit' // junit5 사용 중 -> junit4 제외
+    }
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.0"
-	}
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.0"
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
+
+def registerChapterTest(String chapter) {
+    tasks.register("test${chapter.capitalize()}", Test) {
+        group = "verification"
+        description = "Run ${chapter} tests"
+
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+
+        useJUnitPlatform {
+            includeTags chapter
+        }
+
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+    }
+}
+
+['ch01', 'ch02'].each { chapter ->
+    registerChapterTest(chapter)
+}
+
+
+
+
 

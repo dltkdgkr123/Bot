@@ -1,0 +1,31 @@
+# ===== custom =====
+# http req/res log (in logger dir)
+http.logging.enabled=false
+# mysql dummy data insert (in dummy dir)
+dummy.loader.mysql.enabled=true
+# ===== jpa =====
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+spring.jpa.open-in-view=false
+# ===== mysql =====
+spring.datasource.url=jdbc:mysql://{$YOUR_ADDRESS}/bdt?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username={$YOUR_NAME}
+spring.datasource.password={$YOUR_PASSWORD}
+# ===== prometheus =====
+management.endpoints.web.exposure.include=prometheus
+management.endpoints.prometheus.enabled=prometheus
+management.metrics.tags.application=bdt-server
+# ========== disabled ==========
+# ===== hikari =====
+#spring.datasource.hikari.maximum-pool-size=
+#spring.datasource.hikari.minimum-idle=
+#spring.datasource.hikari.connection-timeout=
+#spring.datasource.hikari.idle-timeout=
+#spring.datasource.hikari.max-lifetime=
+# ===== tomcat =====
+#server.tomcat.threads.max=
+#server.tomcat.accept-count=
+# ===== spring-devtools =====
+#spring.devtools.restart.enabled=true
+#spring.devtools.restart.additional-exclude=static/**,public/**

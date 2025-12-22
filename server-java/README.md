@@ -1,3 +1,36 @@
+### Commands
+
+Windows CMD / PowerShell
+
+```text
+# Run the application
+gradlew clean bootRun
+
+# Run all integration tests
+gradlew clean test
+
+# Run tests for a specific chapter
+gradlew clean testCh01
+gradlew clean testCh02
+..
+```
+
+▶ WSL / Linux / macOS
+```text
+# Run the application
+./gradlew clean bootRun
+
+# Run all integration tests
+./gradlew clean test
+
+# Run tests for a specific chapter
+./gradlew clean testCh01
+./gradlew clean testCh02
+..
+```
+
+
+
 ### Development Setup
 
 style
@@ -36,13 +69,7 @@ git-ignored
 
 additional
 ```
-- dependencies
-    - spring-devtools
-        - enables auto-restart during development
-        - requires additional IntelliJ settings (see below)
-        - ref: https://adjh54.tistory.com/62
-
-- plugins
+- intelliJ plugins
     - lombok
         - annotation processing at compile-time
     - google-java-format

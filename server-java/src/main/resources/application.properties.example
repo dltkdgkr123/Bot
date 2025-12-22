@@ -1,0 +1,5 @@
+spring.application.name=bdt
+server.port=8080
+
+spring.config.import=classpath:application-dev.properties
+

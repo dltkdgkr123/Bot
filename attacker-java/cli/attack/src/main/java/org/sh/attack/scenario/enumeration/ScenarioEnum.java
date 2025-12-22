@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 public enum ScenarioEnum {
 
-  PING("ping");
+  PING("ping"),
+  Like("like");
 
   private final String id;
 
