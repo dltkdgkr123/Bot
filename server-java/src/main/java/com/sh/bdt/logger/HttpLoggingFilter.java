@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
     matchIfMissing = false
 )
 @Component
-    public class HttpLoggingFilter extends HttpFilter {
+public class HttpLoggingFilter extends HttpFilter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
 
