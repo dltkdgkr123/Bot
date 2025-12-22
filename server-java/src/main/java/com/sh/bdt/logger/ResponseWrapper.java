@@ -11,7 +11,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 )
 public class ResponseWrapper extends ContentCachingResponseWrapper {
 
-  public ResponseWrapper(HttpServletResponse response) {
-    super(response);
-  }
+    public ResponseWrapper(HttpServletResponse response) {
+        super(response);
+    }
 }
