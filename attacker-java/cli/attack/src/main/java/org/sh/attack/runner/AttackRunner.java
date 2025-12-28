@@ -11,22 +11,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.sh.attack.config.AttackConfig;
 import org.sh.attack.factory.ScenarioRequestResolver;
+import org.sh.attack.scenario.spec.AttackScenario;
 
 public class AttackRunner {
 
   private final int threads;
   private final int requestsPerThread;
-  private boolean burst;
+  private final boolean burst;
   private final int delayMillis = 10;
 
-  AtomicInteger success = new AtomicInteger();
-  AtomicInteger fail = new AtomicInteger();
+  private final AtomicInteger success = new AtomicInteger();
+  private final AtomicInteger fail = new AtomicInteger();
+  private final AtomicInteger globalSequence = new AtomicInteger(1);
 
   private final HttpClient client;
-  private final HttpRequest request;
+  private final AttackScenario scenario;
 
   public AttackRunner(AttackConfig config) {
-    this.request = ScenarioRequestResolver.create(config);
+    this.scenario = ScenarioRequestResolver.resolve(config);
     this.client = HttpClient.newHttpClient();
     this.threads = config.threads();
     this.requestsPerThread = config.requestsPerThread();
@@ -35,12 +37,8 @@ public class AttackRunner {
 
   public void run() {
     try {
-      ExecutorService pool =
-          Executors.newFixedThreadPool(this.threads);
-
-      CountDownLatch latch = new CountDownLatch(
-          this.burst ? 1 : this.threads
-      );
+      ExecutorService pool = Executors.newFixedThreadPool(this.threads);
+      CountDownLatch latch = new CountDownLatch(this.burst ? 1 : this.threads);
 
       long start = System.currentTimeMillis();
 
@@ -54,21 +52,15 @@ public class AttackRunner {
       if (this.burst) {
         latch.countDown();
       }
+
       pool.shutdown();
       pool.awaitTermination(10, TimeUnit.MINUTES);
 
       long end = System.currentTimeMillis();
-      int total = success.get() + fail.get();
+      printResult(end - start);
 
-      System.out.println("=== RESULT ===");
-      System.out.println("Total Requests : " + total);
-      System.out.println("Success        : " + success.get());
-      System.out.println("Fail           : " + fail.get());
-      System.out.println("Elapsed(ms)    : " + (end - start));
-      System.out.println("RPS            : " + (total * 1000L / (end - start)));
-
-    } catch (InterruptedException ignored) {
-
+    } catch (InterruptedException e) {
+      e.fillInStackTrace();
     }
   }
 
@@ -77,8 +69,10 @@ public class AttackRunner {
       latch.await();
 
       for (int i = 0; i < this.requestsPerThread; i++) {
-        HttpResponse<Void> res =
-            this.client.send(this.request, HttpResponse.BodyHandlers.discarding());
+        int seq = globalSequence.getAndIncrement();
+        HttpRequest request = scenario.toRequest(seq);
+
+        HttpResponse<Void> res = this.client.send(request, HttpResponse.BodyHandlers.discarding());
 
         if (res.statusCode() == 200) {
           success.incrementAndGet();
@@ -90,8 +84,19 @@ public class AttackRunner {
           Thread.sleep(this.delayMillis);
         }
       }
-    } catch (IOException | InterruptedException ignored) {
+    } catch (IOException | InterruptedException e) {
+      e.fillInStackTrace();
+      fail.incrementAndGet();
     }
   }
-}
 
+  private void printResult(long elapsedMs) {
+    int total = success.get() + fail.get();
+    System.out.println("=== RESULT ===");
+    System.out.println("Total Requests : " + total);
+    System.out.println("Success        : " + success.get());
+    System.out.println("Fail           : " + fail.get());
+    System.out.println("Elapsed(ms)    : " + elapsedMs);
+    System.out.println("RPS            : " + (elapsedMs > 0 ? (total * 1000L / elapsedMs) : 0));
+  }
+}

@@ -4,7 +4,7 @@ call scripts\common.bat
 
 java -jar %JAR_PATH% ^
   --scenario like ^
-  --url %BASE_URL%/post/like ^
+  --url %BASE_URL% ^
   --threads 10 ^
   --rpt 1000 ^
   --burst false

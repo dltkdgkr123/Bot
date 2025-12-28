@@ -57,7 +57,7 @@ class LikeTests {
         LikeRequest request = new LikeRequest(nonExistentPostId, 100L);
 
         // when & then
-        assertThatThrownBy(() -> likeService.like(request))
+        assertThatThrownBy(() -> postService.like(request))
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessageContaining("Post not found."); // PostId는 보안상 메세징하지 않는 것이 좋다.
     }

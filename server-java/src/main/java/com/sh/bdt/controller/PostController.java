@@ -1,6 +1,7 @@
 package com.sh.bdt.controller;
 
 import com.sh.bdt.dto.req.LikeRequest;
+import com.sh.bdt.dto.req.LikeRequestV2;
 import com.sh.bdt.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,15 @@ public class PostController {
 
     @PostMapping("/like")
     public ResponseEntity<Void> like(@RequestBody LikeRequest likeRequest) {
-        // skip user auth validate
+        // WARNING: get userId from request body(not token, ..), skip user auth validate for experiment
         postService.like(likeRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/like", headers = "X-API-VERSION=2")
+    public ResponseEntity<Void> likeV2(@RequestBody LikeRequestV2 likeRequestv2) {
+        // WARNING: get userId from request body(not token, ..), skip user auth validate for experiment
+        postService.likeV2(likeRequestv2);
         return ResponseEntity.ok().build();
     }
 }

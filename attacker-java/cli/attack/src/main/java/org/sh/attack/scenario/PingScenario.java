@@ -5,20 +5,19 @@ import java.net.http.HttpRequest;
 import org.sh.attack.config.AttackConfig;
 import org.sh.attack.scenario.spec.AttackScenario;
 
-// ch01: Stateless Ping baseline
 public class PingScenario implements AttackScenario {
 
-  AttackConfig config;
+  private final AttackConfig config;
 
   public PingScenario(AttackConfig config) {
     this.config = config;
   }
 
   @Override
-  public HttpRequest toRequest() {
-
+  public HttpRequest toRequest(int sequence) {
+    // ignore sequence
     return HttpRequest.newBuilder()
-        .uri(URI.create(config.url()))
+        .uri(URI.create(config.url() + "/ping"))
         .header("Content-Type", "application/json")
         .GET()
         .build();

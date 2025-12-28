@@ -4,7 +4,7 @@ call scripts\common.bat
 
 java -jar %JAR_PATH% ^
   --scenario ping ^
-  --url %BASE_URL%/ping ^
+  --url %BASE_URL% ^
   --threads 10 ^
   --rpt 1000 ^
   --burst true

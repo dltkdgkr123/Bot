@@ -4,5 +4,5 @@ import java.net.http.HttpRequest;
 
 public interface AttackScenario {
 
-  HttpRequest toRequest();
+  HttpRequest toRequest(int sequence);
 }
