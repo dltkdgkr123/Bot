@@ -4,6 +4,6 @@ call scripts\common.bat
 
 java -jar %JAR_PATH% ^
   --scenario ping ^
-  --url http://localhost:8080/ping
+  --url %BASE_URL%/ping
 
 pause

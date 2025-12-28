@@ -1,6 +1,6 @@
 
 ### 배치파일 경로(for windows)
-**[scripts](./attacker-java/cli/attack/)**
+**[scripts](./scripts/)**
 
 ## CLI 옵션
 ```text
@@ -32,7 +32,7 @@
 ```bash
 java -jar build/libs/attack.jar \
   --scenario ping \
-  --url http://localhost:8080/ping \
+  --url http://localhost:8080/api/ping \
   --threads 10 \
   --rpt 1000 \
   --burst true
@@ -45,7 +45,7 @@ java -jar build/libs/attack.jar \
 ```bash
 java -jar build/libs/attack.jar ^
   --scenario ping ^
-  --url http://localhost:8080/ping ^
+  --url http://localhost:8080/api/ping ^
   --threads 10 ^
   --rpt 1000 ^
   --burst true

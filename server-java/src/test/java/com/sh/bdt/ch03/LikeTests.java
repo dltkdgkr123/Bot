@@ -7,7 +7,7 @@ import com.sh.bdt.dto.req.LikeRequest;
 import com.sh.bdt.entity.Post;
 import com.sh.bdt.repository.PostLikeRepository;
 import com.sh.bdt.repository.PostRepository;
-import com.sh.bdt.service.LikeService;
+import com.sh.bdt.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 class LikeTests {
 
     @Autowired
-    LikeService likeService;
+    PostService postService;
     @Autowired
     PostRepository postRepository;
     @Autowired
@@ -38,9 +38,9 @@ class LikeTests {
         LikeRequest request = new LikeRequest(postId, userId);
 
         // when
-        likeService.like(request);
-        likeService.like(request);
-        likeService.like(request);
+        postService.like(request);
+        postService.like(request);
+        postService.like(request);
 
         // then
         Post updatedPost = postRepository.findById(postId).orElseThrow();
