@@ -6,7 +6,7 @@ import com.sh.bdt.dto.req.LikeRequest;
 import com.sh.bdt.entity.Post;
 import com.sh.bdt.repository.PostLikeRepository;
 import com.sh.bdt.repository.PostRepository;
-import com.sh.bdt.service.LikeService;
+import com.sh.bdt.service.PostService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class MVCTests {
 
-  @Autowired LikeService likeService;
+  @Autowired
+  PostService postService;
 
   @Autowired PostRepository postRepository;
 
@@ -37,7 +38,7 @@ class MVCTests {
     LikeRequest request = new LikeRequest(postId, userId);
 
     // when
-    likeService.like(request);
+      postService.like(request);
 
     // then
     Post updatedPost = postRepository.findById(postId).orElseThrow();
