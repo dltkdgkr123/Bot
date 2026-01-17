@@ -1,5 +1,6 @@
 package com.sh.bdt.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -15,15 +16,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTime {
 
-  @Getter @Id @GeneratedValue private Long id;
+    @Getter
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @Getter private int likeCount;
+    @Getter
+    @Column(name = "like_count", nullable = false)
+    private int likeCount;
 
-  public void increaseLike() {
-    this.likeCount++;
-  }
+    @Getter
+    @Column(name = "batched_at")
+    private long batchedAt;
 
-  public static Post create() { // for dummy
-    return new Post(null, 0);
-  }
+    public void increaseLike() {
+        this.likeCount++;
+    }
+
+    public static Post create() { // 안티 패턴: 엔티티에 더미, 테스트용 메서드 주입 (실험을 위해 채택)
+        return new Post(null, 0, 0L);
+    }
 }

@@ -5,7 +5,10 @@ import java.util.Arrays;
 public enum ScenarioEnum {
 
   PING("ping"),
-  Like("like");
+  Like("like"),
+  LikeMassiveUsers("like_massive_users"),
+  LikeV2("like_v2"),
+  LikeV2MassiveUsers("like_v2_massive_users");
 
   private final String id;
 

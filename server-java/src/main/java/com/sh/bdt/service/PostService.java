@@ -1,8 +1,9 @@
 package com.sh.bdt.service;
 
-import com.sh.bdt.dto.req.LikeRequest;
-import com.sh.bdt.dto.req.LikeRequestV2;
+import com.sh.bdt.dto.req.PostLikeRequest;
+import com.sh.bdt.dto.req.PostLikeRequestV2;
 import com.sh.bdt.expection.LikeConflictException;
+import com.sh.bdt.property.RedisKeyProperties;
 import com.sh.bdt.repository.PostLikeRepository;
 import com.sh.bdt.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,7 +22,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
 
     @Transactional
-    public void like(LikeRequest request) {
+    public void like(PostLikeRequest request) {
 
         // case: fk가 없는 상태에서 insert 시도
         int result = postLikeRepository.insertIgnore(request.postId(), request.userId());
@@ -43,24 +44,23 @@ public class PostService {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisScript<Long> likeScript;
+    private final RedisKeyProperties redisProperties;
 
-    public void likeV2(LikeRequestV2 request) {
+    public void likeV2(PostLikeRequestV2 request) {
 
         // @Transactional 제거: Redis가 Atomic한 상태
         Long postId = request.postId();
         Long userId = request.userId();
         int newStatus = request.status(); // 1: 좋아요, 0: 취소
 
-        // KEYS[1]: 포스트별 유저들의 상태 (Map<PostId, Map<UserId, Status>>)
-        String statusKey = "post:like:status:" + postId;
-        // KEYS[2]: 모든 포스트의 좋아요 총합 (Map<PostId, Count>)
-        String countKey = "post:like:count";
-        // KEYS[3]: 변경된 PostId 내역 (Set<PostId>)
-        String changedKey = "post:like:changed";
+        // KEYS[1]: 포스트별 유저들의 좋아요 상태
+        String statusKey = redisProperties.postLike().realtime().statusPrefix() + postId;
+        // KEYS[2]: 변화가 일어난 postId
+        String queueKey = redisProperties.postLike().batch().queueSet();
 
         Long result = stringRedisTemplate.execute(
             likeScript,
-            List.of(statusKey, countKey, changedKey),
+            List.of(statusKey, queueKey),
             String.valueOf(userId),
             String.valueOf(newStatus),
             String.valueOf(postId)

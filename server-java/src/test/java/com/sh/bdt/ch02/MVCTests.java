@@ -2,7 +2,7 @@ package com.sh.bdt.ch02;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sh.bdt.dto.req.LikeRequest;
+import com.sh.bdt.dto.req.PostLikeRequest;
 import com.sh.bdt.entity.Post;
 import com.sh.bdt.repository.PostLikeRepository;
 import com.sh.bdt.repository.PostRepository;
@@ -35,7 +35,7 @@ class MVCTests {
     Long postId = post.getId();
     Long userId = 100L;
 
-    LikeRequest request = new LikeRequest(postId, userId);
+    PostLikeRequest request = new PostLikeRequest(postId, userId);
 
     // when
       postService.like(request);

@@ -9,7 +9,7 @@ spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.format_sql=false
 spring.jpa.open-in-view=false
 # ===== mysql =====
-spring.datasource.url=jdbc:mysql://{$YOUR_ADDRESS}/{$YOUR_SCHEMA}?{$YOUR_OPTIONS}
+spring.datasource.url=jdbc:mysql://{$YOUR_ADDRESS}/{$YOUR_SCHEMA}?{$YOUR_OPTIONS}&rewriteBatchedStatements=true
 spring.datasource.username={$YOUR_NAME}
 spring.datasource.password={$YOUR_PASSWORD}
 # ===== prometheus =====
@@ -35,3 +35,11 @@ spring.data.redis.port={$YOUR_PORT}
 spring.data.redis.password={$YOUR_PASSWORD}
 # ===== thymeleaf =====
 spring.thymeleaf.cache=false
+
+# 레디스 키 컨벤션 - 도메인:목적:타입:식별자
+redis.keys.post-like.batch.meta-time=post-like:batch:meta:last-time
+redis.keys.post-like.batch.meta-seq=post-like:batch:meta:last-seq
+redis.keys.post-like.batch.queue-set=post-like:batch:queue
+redis.keys.post-like.batch.status-prefix=post-like:batch:status:
+redis.keys.post-like.batch.snapshot-prefix=post-like:batch:snapshot:
+redis.keys.post-like.realtime.status-prefix=post-like:realtime:status:
