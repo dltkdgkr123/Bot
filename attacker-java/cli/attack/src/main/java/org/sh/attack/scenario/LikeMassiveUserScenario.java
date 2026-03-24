@@ -5,23 +5,25 @@ import java.net.http.HttpRequest;
 import org.sh.attack.config.AttackConfig;
 import org.sh.attack.scenario.spec.AttackScenario;
 
-public class LikeScenario implements AttackScenario {
+public class LikeMassiveUserScenario implements AttackScenario {
 
   private final AttackConfig config;
 
-  public LikeScenario(AttackConfig config) {
+  public LikeMassiveUserScenario(AttackConfig config) {
     this.config = config;
   }
 
   @Override
   public HttpRequest toRequest(int sequence) {
-    // ignore sequence
+    int userPoolSize = 100000;
+    int userId = (sequence % userPoolSize) + 1;
+
     String body = """
         {
           "postId": 1,
-          "userId": 1
+          "userId": %d
         }
-        """;
+        """.formatted(userId);
 
     return HttpRequest.newBuilder()
         .uri(URI.create(config.url() + "/post/like"))

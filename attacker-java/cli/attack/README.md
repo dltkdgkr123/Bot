@@ -2,6 +2,12 @@
 ### 배치파일 경로(for windows)
 **[scripts](./scripts/)**
 
+```text
+# Build the CLI-Java application into a .jar file. This is required to run the .bat scripts in the CLI module.
+cd attacker-java/cli/attack
+./gradlew clean jar
+```
+
 ## CLI 옵션
 ```text
 - `--scenario` (string)

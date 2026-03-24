@@ -25,51 +25,61 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
+    // ----- managed by spring boot(plugin) -----
+
+    // test
+//    testImplementation "org.mockito:mockito-core"
+//    testImplementation "org.mockito:mockito-junit-jupiter"
+//
+//    testImplementation "org.junit.jupiter:junit-jupiter"
+//    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'junit' // junit5 사용 중 -> junit4 제외
+    }
+
+    // web
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-    implementation 'org.springframework.boot:spring-boot-starter-kafka'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // data
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
+
+    // observe
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
-    // with bom
+    // anno
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
-    // with bom
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
+    // ----- managed by bom -----
 
-    // with bom
-    testImplementation platform("org.mockito:mockito-bom:5.12.0")
-    testImplementation "org.mockito:mockito-core"
-    testImplementation "org.mockito:mockito-junit-jupiter"
-
-    // with bom
-    testImplementation platform('org.junit:junit-bom:5.9.2')
-    testImplementation "org.junit.jupiter:junit-jupiter"
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'junit' // junit5 사용 중 -> junit4 제외
-    }
+    // orm sql
+    implementation "com.querydsl:querydsl-jpa::jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt::jakarta"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.0"
+        mavenBom "com.querydsl:querydsl-bom:5.0.0"
     }
 }
 
 tasks.named('test') {
-
     useJUnitPlatform()
 
     testLogging {
@@ -99,6 +109,19 @@ def registerChapterTest(String chapter) {
     registerChapterTest(chapter)
 }
 
+def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+
+sourceSets {
+    main.java.srcDirs += querydslDir
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(querydslDir)
+}
+
+clean {
+    delete querydslDir
+}
 
 
 

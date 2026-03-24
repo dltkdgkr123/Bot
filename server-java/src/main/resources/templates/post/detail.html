@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    .like-btn { cursor: pointer; border: 1px solid #ccc; padding: 10px; background: #fff; }
+    .like-btn.on { background-color: #ffebee; border-color: red; color: red; }
+    .like-btn.off { background-color: #f5f5f5; color: #666; }
+  </style>
+</head>
+<body>
+
+<div class="post-content" th:with="info=${post.PostInfo}, user=${post.userContext}">
+  <button type="button"
+          class="like-btn"
+          id="likeBtn"
+          th:classappend="${user.isLogin && user.userInfo != null && user.userInfo.isLiked} ? 'on' : 'off'"
+          th:data-post-id="${info.postId}"
+          th:data-is-liked="${user.isLogin && user.userInfo != null && user.userInfo.isLiked}"
+          th:data-count="${info.likeCount}"
+          onclick="handleLikeClick()">
+
+    <span id="likeIcon"
+          th:text="${user.isLogin && user.userInfo != null && user.userInfo.isLiked} ? '❤️' : '🤍'">🤍</span>
+    <span id="likeCountText"
+          th:text="${info.likeCount}">0</span>
+  </button>
+</div>
+
+<script th:inline="javascript">
+  let debounceTimer = null;
+
+  const btn = document.getElementById('likeBtn');
+
+  let state = {
+      postId: 1, // 안티 패턴: 프로덕션 코드 내 모킹 (실험을 위해 채택)
+      userId: 1, // 안티 패턴: 프로덕션 코드 내 모킹 (실험을 위해 채택)
+      isLiked: btn.getAttribute('data-is-liked') === 'true',
+      count: parseInt(btn.getAttribute('data-count'))
+  };
+
+  function handleLikeClick() {
+      state.isLiked = !state.isLiked;
+      state.count = state.isLiked ? state.count + 1 : state.count - 1;
+
+      renderBtn();
+
+      if (debounceTimer) clearTimeout(debounceTimer);
+
+      debounceTimer = setTimeout(() => {
+          syncWithServer();
+      }, 500);
+  }
+
+  function renderBtn() {
+      const icon = document.getElementById('likeIcon');
+      const text = document.getElementById('likeCountText');
+
+      btn.className = 'like-btn ' + (state.isLiked ? 'on' : 'off');
+      icon.innerText = state.isLiked ? '❤️' : '🤍';
+      text.innerText = state.count;
+  }
+
+  async function syncWithServer() {
+      const payload = {
+          postId: state.postId,
+          userId: state.userId,
+          status: state.isLiked ? 1 : 0,
+      };
+
+      try {
+          const response = await fetch('/api/post/like', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-API-VERSION': '2' },
+              body: JSON.stringify(payload)
+          });
+
+        if (response.status === 409) {
+            // 409 Conflict: 서버와 이미 상태가 같음.
+            // 롤백하지 않고 현재 UI 상태를 유지
+            console.log("Already in desired state.");
+            return;
+        }
+      } catch (e) {
+          // 네트워크 장애 등으로 실패 시에는 롤백
+          state.isLiked = !state.isLiked;
+          state.count = state.isLiked ? state.count + 1 : state.count - 1;
+          renderBtn();
+      }
+  }
+</script>
+
+</body>
+</html>

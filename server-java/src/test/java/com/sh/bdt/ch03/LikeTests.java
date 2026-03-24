@@ -3,7 +3,7 @@ package com.sh.bdt.ch03;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.sh.bdt.dto.req.LikeRequest;
+import com.sh.bdt.dto.req.PostLikeRequest;
 import com.sh.bdt.entity.Post;
 import com.sh.bdt.repository.PostLikeRepository;
 import com.sh.bdt.repository.PostRepository;
@@ -35,7 +35,7 @@ class LikeTests {
 
         Long postId = post.getId();
         Long userId = 100L;
-        LikeRequest request = new LikeRequest(postId, userId);
+        PostLikeRequest request = new PostLikeRequest(postId, userId);
 
         // when
         postService.like(request);
@@ -54,10 +54,10 @@ class LikeTests {
     void like_shouldThrowEntityNotFoundException_whenPostDoesNotExistAndWithNoFKConstrains() { // 의도된 예외 던지나 검증
         // given
         Long nonExistentPostId = 9999L;
-        LikeRequest request = new LikeRequest(nonExistentPostId, 100L);
+        PostLikeRequest request = new PostLikeRequest(nonExistentPostId, 100L);
 
         // when & then
-        assertThatThrownBy(() -> likeService.like(request))
+        assertThatThrownBy(() -> postService.like(request))
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessageContaining("Post not found."); // PostId는 보안상 메세징하지 않는 것이 좋다.
     }
