@@ -31,24 +31,25 @@ public class PostLikeBatchProcessor {
 
         long batchSeq = chunks.getFirst().batchSeq();
         String hexBatchSeq = Long.toHexString(batchSeq);
-        String stagingTable = "stage_like_batch_" + batchSeq;
+        String stagingTableName = "stage_like_batch_" + batchSeq;
 
         try {
             // 1. 고유 스테이징 테이블 생성 (인스턴스 간 격리 및 병렬 처리 보장)
-            prepareStagingTable(stagingTable);
+            prepareStagingTable(stagingTableName);
 
             // 2. 플랫 DTO 벌크 인서트 (JdbcTemplate batchUpdate 기반)
-            saveToStaging(stagingTable, chunks);
+            saveToStaging(stagingTableName, chunks);
 
             // 3. 비즈니스 로직 수행 (포스트 카운트 증분 및 좋아요 상태 Upsert)
-            updatePost(stagingTable);
-            upsertPostLike(stagingTable);
+            updatePost(stagingTableName);
+            upsertPostLike(stagingTableName);
 
             // 4. DB 커밋 성공 시에만 Redis 스냅샷 파기 및 상태 전이 수행 (Send ACK)
             TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
+                        jdbcTemplate.execute("DROP TABLE IF EXISTS " + stagingTableName);
                         sendAck(hexBatchSeq);
                     }
                 });
@@ -56,8 +57,7 @@ public class PostLikeBatchProcessor {
             log.error("Batch Processor Error at seq: {}", batchSeq, e);
             throw e; // 트랜잭션 롤백 유도
         } finally {
-            // 스테이징 테이블 삭제 (성공/실패 여부와 상관없이 리소스 회수)
-            jdbcTemplate.execute("DROP TABLE IF EXISTS " + stagingTable);
+
         }
     }
 
