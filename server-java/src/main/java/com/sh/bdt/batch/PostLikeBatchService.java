@@ -22,7 +22,7 @@ public class PostLikeBatchService {
 
     private final String BATCH_SIZE = "5000";
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 50)
     public void run() {
         while (true) {
             // 1. 루아 스크립트로 batch_seq 확보 및 원자적 스냅샷 생성
