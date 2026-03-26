@@ -1505,10 +1505,89 @@ client 요청이 서버로 전달되는 찰나에 집계를 수행한다. 사용
 
 
 </details>
-50만 HTTP 요청 수용을 위한 최적화: Front-End 영역에서 고민한 내용을 다룹니다. (추가 중)
+50만 HTTP 요청 수용을 위한 최적화: Front-End 영역에서 고민한 내용을 다룹니다.
 
 </br>
 </br>
+<details>
+<summary>ch04-03: Scaling to 500k Requests with Back-End</summary>
+</details>
+50만 HTTP 요청 수용을 위한 최적화: Backed-End 영역에서 고민한 내용을 다룹니다. (작성 예정)
+
+</br>
+</br>
+<details>
+<summary>ch04-04: Scaling to 500k Requests with Observation</summary>
+
+### 1. 목적
+100만 건의 Http 부하테스트를 관측 (userId 1~100만인 유저들이 한 번씩 좋아요(Like v2 API) 요청)
+
+- 성공 기준: 요청 실패(Http Status 4xx, 5xx) 0건, Total Request=100M, DB 정합성 보존(post.like_cnt, post_like table size=100M)
+- 수용에 성공했다면, 주요 개선 사항 도출
+
+</br>
+
+- 실패 기준: 하나라도 위 조건에 위배될 경우
+- 수용에 실패했다면, 주요 실패 요인 도출
+
+#### 결과 요약:
+1. 100만 건의 요청을 13분 34초 가량으로 처리 완료
+2. 극단적인 환경 제약(Connection Pool=10, TimeOut=1s)에도 요청 실패(Http Status 4xx, 5xx)가 0건 발생
+3. RPS(Request Per Second) 또한 적절한 수치를 유지(900 ~ 1500)
+
+#### 인사이트:
+1. Redis Hash(Lua) 명령어에서 우려되는 '해시 파편화' 문제로 CPU Spike는 치솟음
+2. 클라이언트(Attacker CLI)의 Total Requst 지표가 서버(Grafana)지표가 상이
+3. 반복 실험으로 평탄화 된 성능 지표 필요
+
+#### 개선 필요 사항:
+1. 가용성, 정합성은 보존되었으나 CPU 연산 로직(Redis 측)에는 개선의 우려가 많음
+2. 클라이언트에서 Atomic Count를 수행했음에도 서버와 Total Request 지표가 다른 이유 도출 필요
+3. 반복 실험 및 Redis 개선 후 벤치마킹 필요
+
+### 2. 실험 환경
+- DB: MySQL 8.0(InnoDB Engine)
+- Server: Java, Spring Boot, HikariCP, JPA
+- Cache: Redis(With Lua, Master-Slave Architecture)
+- Observation Tools: Prometheus & Grafana, MySQL Workbench
+
+</br>
+
+- Attacker Env: CLI(JavaSE), Script File(like_v2_100m_massive_users.bat)
+- Server Env: Connection Pool=10, Timeout=1s
+- DB Env: Repeatable Read, Auto Commit=false
+- Batch Env: Parallel Batch(With Staging Table, JdbcTemplate)
+
+</br>
+
+- HW Env: Inter i5-7300HQ(CPU), 16GB RAM
+- OS Env: Windows(CMD), Linux(WSL2 in Windows)
+
+</br>
+
+- 공격기(CLI)와 서버는 같은 컴퓨팅 자원을 공유 (리전에 따른 물리적 통신 지연 없음)
+- 모든 서비스는 단일 인스턴스로 구성 (관심사에 집중하기 위함)
+- Redis 관측은 Master(port:6379) Node에서 진행 (추후 Slave 관측 예정)
+
+### 3. 결과 화면
+
+#### - 주요 성능 지표[Redis, Like(V2) API]
+![image.png](./imgs/ch04-http_scailing/grafana_view01.png)
+
+
+
+#### - 집계 테이블(Post)의 정합성 보존 확인[like_cnt 100만]
+![image.png](./imgs/ch04-http_scailing/mysql_view01.png)
+
+
+
+#### - 맵핑 테이블(Like)의 정합성 보존 확인[Table Size 100만]
+![image.png](./imgs/ch04-http_scailing/mysql_view02.png)
+
+</details>
+50만 HTTP 요청 수용을 위한 최적화: 모니터링 영역을 다룹니다. (추가 중)
+
+
 ---
 
 Server
